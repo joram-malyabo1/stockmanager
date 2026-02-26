@@ -248,10 +248,10 @@ class _ListeProduitsPageState extends State<ListeProduitsPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => DetailsProduitPage(
-                                produitId: p.id,
-                                magasinNom: widget.magasinNom,  // ✅ CORRIGÉ
-                                token: widget.token,  // AJOUTEZ CETTE LIGNE
+                            builder: (context) => DetailsProduitPage(
+                              produitId: p.id!,       // ✅ UTILISEZ 'produitId' au lieu de 'produit'
+                              magasinNom: widget.magasinNom,
+                              token: widget.token,
                             ),
                           ),
                         );
