@@ -2,10 +2,16 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:stockmanager/presentation/interfaces/liste_receptions_page.dart';
+import 'package:stockmanager/presentation/interfaces/reception_stock_page.dart';
 import '../../models/produit_model.dart';
 import '../../service/produit_service.dart';
-import 'DetailsProduitPage.dart';
+// import 'DetailsProduitPage.dart';
 import 'ListProduit.dart';
+
+// ⚠️ AJOUTEZ CES DEUX IMPORTS (Ajustez le chemin selon vos dossiers)
+// import 'ReceptionStockPage.dart';
+// import 'ListeReceptionsPage.dart';
 
 class DashboardMagasinPage extends StatefulWidget {
   final String magasinId;
@@ -176,7 +182,7 @@ class _DashboardMagasinPageState extends State<DashboardMagasinPage> {
           HapticFeedback.lightImpact();  // Vibration Android
 
           // Animation scale bouton
-          final controller = AnimationController(
+          /*final controller = AnimationController(
             duration: Duration(milliseconds: 150),
             vsync: Navigator.of(context),
           );
@@ -188,7 +194,7 @@ class _DashboardMagasinPageState extends State<DashboardMagasinPage> {
 
           await Future.delayed(Duration(milliseconds: 150));
           controller.reverse();
-          controller.dispose();
+          controller.dispose();*/
 
           Navigator.push(
             context,
@@ -242,8 +248,7 @@ class _DashboardMagasinPageState extends State<DashboardMagasinPage> {
     );
   }
 
-
-  // ✅ MENU DRAWER (comme avant)
+  // ✅ MENU DRAWER MIS À JOUR
   Widget _buildDrawer() {
     return Drawer(
       child: Column(
@@ -252,20 +257,27 @@ class _DashboardMagasinPageState extends State<DashboardMagasinPage> {
             decoration: const BoxDecoration(color: Color(0xFF1E6FD9)),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.store, size: 30, color: const Color(0xFF1E6FD9)),
+                Center(
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.store, size: 30, color: const Color(0xFF1E6FD9)),
+                  ),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  widget.nomUtilisateur ?? "Utilisateur",
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                Center(
+                  child: Text(
+                    widget.nomUtilisateur ?? "Utilisateur",
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
                 ),
-                Text(
-                  widget.magasinNom,
-                  style: const TextStyle(fontSize: 14, color: Colors.white70),
+                Center(
+                  child: Text(
+                    widget.magasinNom,
+                    style: const TextStyle(fontSize: 14, color: Colors.white70),
+                  ),
                 ),
               ],
             ),
@@ -274,13 +286,14 @@ class _DashboardMagasinPageState extends State<DashboardMagasinPage> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                _drawerItem(Icons.dashboard, "Dashboard", onTap: () {}), // Page actuelle
+                _drawerItem(Icons.dashboard, "Dashboard", onTap: () => Navigator.pop(context)),
+
                 _drawerItem(Icons.list, "Articles", onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => DashboardMagasinPage(
+                      builder: (_) => ListeProduitsPage(
                         magasinId: widget.magasinId,
                         magasinNom: widget.magasinNom,
                         token: widget.token,
@@ -289,9 +302,52 @@ class _DashboardMagasinPageState extends State<DashboardMagasinPage> {
                     ),
                   );
                 }),
+
+                const Divider(), // Petite séparation visuelle
+
+                // ✅ NOUVEAU MENU : RÉCEPTION
+                _drawerItem(Icons.move_to_inbox, "Nouvelle Réception", color: Colors.green, onTap: () {
+                  Navigator.pop(context);
+                  // Décommentez ceci quand l'import sera fait
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReceptionStockPage(
+                        magasinId: widget.magasinId,
+                        magasinNom: widget.magasinNom,
+                        token: widget.token,
+                      ),
+                    ),
+                  );
+
+                }),
+
+                // ✅ NOUVEAU MENU : HISTORIQUE DES RÉCEPTIONS
+                _drawerItem(Icons.history_toggle_off, "Historique Réceptions", color: Colors.orange, onTap: () {
+                  Navigator.pop(context);
+                  // Décommentez ceci quand l'import sera fait
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ListeReceptionsPage(
+                        magasinId: widget.magasinId,
+                        token: widget.token,
+                      ),
+                    ),
+                  );
+
+                }),
+
+                const Divider(),
+
                 _drawerItem(Icons.shopping_basket, "Ventes"),
                 _drawerItem(Icons.receipt_long, "Recettes"),
                 _drawerItem(Icons.access_time, "Reçus"),
+
+                const Divider(),
+
                 _drawerItem(Icons.logout, "Déconnexion", color: Colors.red),
               ],
             ),

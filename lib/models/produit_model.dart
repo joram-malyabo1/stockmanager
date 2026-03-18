@@ -1,4 +1,4 @@
-// models/produit_model.dart
+// models/produit_model.dart - VERSION CORRIGÉE
 class Produit {
   final String id;
   final String magasinId;
@@ -29,35 +29,18 @@ class Produit {
   final List<dynamic> alertes;
 
   Produit({
-    required this.id,
-    required this.magasinId,
-    required this.reference,
-    required this.designation,
-    required this.typeProduitId,
-    required this.rayonId,
-    required this.quantiteActuelle,
-    required this.quantiteEntree,
-    required this.quantiteSortie,
-    required this.prixUnitaire,
-    required this.prixTotal,
-    required this.etat,
-    this.dateEntree,
-    this.dateReception,
-    this.dateFabrication,
-    this.dateExpiration,
-    this.datePeremption,
-    required this.seuilAlerte,
-    this.photoUrl,
-    required this.notes,
-    required this.statut,
-    required this.priorite,
-    required this.status,
-    required this.estSupprime,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.alertes,
+    required this.id, required this.magasinId, required this.reference,
+    required this.designation, required this.typeProduitId, required this.rayonId,
+    required this.quantiteActuelle, required this.quantiteEntree, required this.quantiteSortie,
+    required this.prixUnitaire, required this.prixTotal, required this.etat,
+    this.dateEntree, this.dateReception, this.dateFabrication,
+    this.dateExpiration, this.datePeremption, required this.seuilAlerte,
+    this.photoUrl, required this.notes, required this.statut,
+    required this.priorite, required this.status, required this.estSupprime,
+    required this.createdAt, required this.updatedAt, required this.alertes,
   });
 
+  // ✅ FIX COMPLET : TOUS les int/double convertis String→Number
   factory Produit.fromJson(Map<String, dynamic> json) {
     return Produit(
       id: json['_id']?.toString() ?? '',
@@ -66,26 +49,39 @@ class Produit {
       designation: json['designation']?.toString() ?? '',
       typeProduitId: TypeProduitId.fromJson(json['typeProduitId'] ?? {}),
       rayonId: RayonId.fromJson(json['rayonId'] ?? {}),
-      quantiteActuelle: json['quantiteActuelle'] ?? 0,
-      quantiteEntree: json['quantiteEntree'] ?? 0,
-      quantiteSortie: json['quantiteSortie'] ?? 0,
+
+      // ✅ FIX INT (String → int)
+      quantiteActuelle: int.tryParse(json['quantiteActuelle']?.toString() ?? '0') ?? 0,
+      quantiteEntree: int.tryParse(json['quantiteEntree']?.toString() ?? '0') ?? 0,
+      quantiteSortie: int.tryParse(json['quantiteSortie']?.toString() ?? '0') ?? 0,
+
+      // ✅ DOUBLE (déjà bon)
       prixUnitaire: double.tryParse(json['prixUnitaire']?.toString() ?? '0') ?? 0.0,
       prixTotal: double.tryParse(json['prixTotal']?.toString() ?? '0') ?? 0.0,
+
       etat: json['etat']?.toString() ?? '',
       dateEntree: json['dateEntree']?.toString(),
       dateReception: json['dateReception']?.toString(),
       dateFabrication: json['dateFabrication']?.toString(),
       dateExpiration: json['dateExpiration']?.toString(),
       datePeremption: json['datePeremption']?.toString(),
-      seuilAlerte: json['seuilAlerte'] ?? 0,
+
+      // ✅ FIX INT
+      seuilAlerte: int.tryParse(json['seuilAlerte']?.toString() ?? '0') ?? 0,
+
       photoUrl: json['photoUrl']?.toString(),
       notes: json['notes']?.toString() ?? '',
       statut: json['statut']?.toString() ?? '',
       priorite: json['priorite']?.toString() ?? '',
-      status: json['status'] ?? 0,
-      estSupprime: json['estSupprime'] ?? false,
-      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
+
+      // ✅ FIX INT
+      status: int.tryParse(json['status']?.toString() ?? '0') ?? 0,
+
+      // ✅ FIX BOOL
+      estSupprime: json['estSupprime']?.toString().toLowerCase() == 'true',
+
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ?? DateTime.now(),
       alertes: json['alertes'] ?? [],
     );
   }
@@ -101,15 +97,12 @@ class TypeProduitId {
   final int capaciteMax;
 
   TypeProduitId({
-    required this.id,
-    required this.nomType,
-    required this.unitePrincipale,
-    required this.code,
-    required this.icone,
-    required this.seuilAlerte,
+    required this.id, required this.nomType, required this.unitePrincipale,
+    required this.code, required this.icone, required this.seuilAlerte,
     required this.capaciteMax,
   });
 
+  // ✅ FIX TypeProduitId
   factory TypeProduitId.fromJson(Map<String, dynamic> json) {
     return TypeProduitId(
       id: json['_id']?.toString() ?? '',
@@ -117,8 +110,9 @@ class TypeProduitId {
       unitePrincipale: json['unitePrincipale']?.toString() ?? '',
       code: json['code']?.toString() ?? '',
       icone: json['icone']?.toString() ?? '',
-      seuilAlerte: json['seuilAlerte'] ?? 0,
-      capaciteMax: json['capaciteMax'] ?? 0,
+      // ✅ FIX INT
+      seuilAlerte: int.tryParse(json['seuilAlerte']?.toString() ?? '0') ?? 0,
+      capaciteMax: int.tryParse(json['capaciteMax']?.toString() ?? '0') ?? 0,
     );
   }
 }
@@ -133,24 +127,22 @@ class RayonId {
   final int quantiteActuelle;
 
   RayonId({
-    required this.id,
-    required this.codeRayon,
-    required this.nomRayon,
-    required this.typeRayon,
-    required this.capaciteMax,
-    required this.iconeRayon,
+    required this.id, required this.codeRayon, required this.nomRayon,
+    required this.typeRayon, required this.capaciteMax, required this.iconeRayon,
     required this.quantiteActuelle,
   });
 
+  // ✅ FIX RayonId
   factory RayonId.fromJson(Map<String, dynamic> json) {
     return RayonId(
       id: json['_id']?.toString() ?? '',
       codeRayon: json['codeRayon']?.toString() ?? '',
       nomRayon: json['nomRayon']?.toString() ?? '',
       typeRayon: json['typeRayon']?.toString() ?? '',
-      capaciteMax: json['capaciteMax'] ?? 0,
+      // ✅ FIX INT
+      capaciteMax: int.tryParse(json['capaciteMax']?.toString() ?? '0') ?? 0,
       iconeRayon: json['iconeRayon']?.toString() ?? '',
-      quantiteActuelle: json['quantiteActuelle'] ?? 0,
+      quantiteActuelle: int.tryParse(json['quantiteActuelle']?.toString() ?? '0') ?? 0,
     );
   }
 }

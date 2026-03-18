@@ -152,12 +152,12 @@ class ItemsPage extends StatelessWidget {
               title: const Text("Articles"),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ArticlesListPage(),
-                  ),
-                );
+                // Navigator.push(
+                //   context,
+                //   // MaterialPageRoute(
+                //   //   // builder: (_) => ArticlesListPage(),
+                //   // ),
+                // );
               },
             ),
             const Divider(height: 1),

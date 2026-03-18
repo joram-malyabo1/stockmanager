@@ -5,7 +5,9 @@ import 'dart:async';
 class DelayedAnimation extends StatefulWidget {
   final Widget child;
   final int delay;
-  const DelayedAnimation({required this.delay, required this.child});
+
+  // ---> C'EST ICI QUE LA CORRECTION A ÉTÉ FAITE (ajout de Key? key et super(key: key)) <---
+  const DelayedAnimation({Key? key, required this.delay, required this.child}) : super(key: key);
 
   @override
   _DelayedAnimationState createState() => _DelayedAnimationState();
@@ -32,7 +34,7 @@ class _DelayedAnimationState extends State<DelayedAnimation>
     ).animate(curve);
 
     Timer(Duration(milliseconds: widget.delay), () {
-      _controller.forward();
+      if (mounted) _controller.forward(); // Ajout de "mounted" pour éviter les fuites de mémoire
     });
   }
 
@@ -59,13 +61,15 @@ class AnimatedImageFly extends StatefulWidget {
   final String image;
   final VoidCallback onEnd;
 
+  // ---> CORRECTION ICI AUSSI <---
   const AnimatedImageFly({
+    Key? key,
     required this.startOffset,
     required this.endOffset,
     required this.size,
     required this.image,
     required this.onEnd,
-  });
+  }) : super(key: key);
 
   @override
   _AnimatedImageFlyState createState() => _AnimatedImageFlyState();
@@ -127,7 +131,6 @@ class AnimatedTicketCounter extends StatefulWidget {
   AnimatedTicketCounterState createState() => AnimatedTicketCounterState();
 }
 
-// Expose l’état pour GlobalKey
 class AnimatedTicketCounterState extends State<AnimatedTicketCounter>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
