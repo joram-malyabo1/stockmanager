@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stockmanager/presentation/blocs/theme_bloc.dart';
 import 'package:stockmanager/presentation/blocs/theme_state.dart';
-import 'package:stockmanager/presentation/interfaces/creation_compte_page.dart';
 import 'package:stockmanager/presentation/interfaces/welcome_page.dart';
+import 'package:flutter/foundation.dart';  // kIsWeb
+import 'package:flutter/material.dart';   // MediaQuery
 
 // import 'database/db_helper.dart';
 
@@ -33,9 +34,6 @@ class MyApp extends StatelessWidget {
           title: 'Stock App',
           theme: state.themeData,
           home:  WelcomePage(),
-          routes: {
-            '/creation': (_) =>  CreationComptePage(),
-          },
         );
       },
     );

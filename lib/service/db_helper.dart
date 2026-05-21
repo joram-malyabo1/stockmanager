@@ -1,8 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-import '../models/categorie.dart';
-import '../models/produit.dart';
 
 class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
@@ -180,21 +178,7 @@ class DBHelper {
   }
 
 
-  Future<int> insertCategorie(Categorie categorie) async {
-    final db = await database;
 
-    final res = await db.query(
-      'categorie',
-      where: 'nom = ?',
-      whereArgs: [categorie.nom],
-    );
-
-    if (res.isNotEmpty) {
-      return res.first['id'] as int;
-    }
-
-    return await db.insert('categorie', categorie.toMap());
-  }
 
   Future<List<String>> getCategories() async {
     final db = await database;
@@ -205,58 +189,6 @@ class DBHelper {
   }
 
   
-
-// INSÉRER UN ARTICLE
-  Future<int> insertArticle(Article article) async {
-    final db = await database;
-
-    int? categorieId;
-    if (article.categorie != null) {
-      categorieId = await insertCategorie(
-        Categorie(nom: article.categorie!),
-      );
-    }
-
-    final map = article.toMap();
-    map['categorie_id'] = categorieId;
-
-    return await db.insert('article', map);
-  }
-
-
-
-  Future<List<Article>> getAllArticles() async {
-    final db = await database;
-
-    final List<Map<String, dynamic>> maps = await db.query(
-      'article',
-      orderBy: 'nom ASC',
-    );
-    return maps.map((e) => Article.fromMap(e)).toList();
-  }
-
-  Future<List<Article>> getArticlesByCategorie(String categorie) async {
-    final db = await database;
-    final result = await db.query(
-      'articles',
-      where: 'categorie = ?',
-      whereArgs: [categorie],
-    );
-    return result.map((e) => Article.fromMap(e)).toList();
-  }
-
-  Future<void> destockerArticle(int articleId, int quantiteVendue) async {
-    final db = await database;
-    await db.rawUpdate(
-      '''
-    UPDATE articles
-    SET quantite = quantite - ?
-    WHERE id = ? AND quantite >= ?
-    ''',
-      [quantiteVendue, articleId, quantiteVendue],
-    );
-  }
-
 
 
 

@@ -1,12 +1,18 @@
-
-
-import 'package:stockmanager/models/produit.dart';
+import 'produit_model.dart';
 
 class TicketItem {
-  Article article;
+  final Produit produit;
   int quantite;
+  String typeVente; // "partiel" (unité) ou "entier" (lot)
 
-  TicketItem({required this.article, this.quantite = 1});
+  TicketItem({
+    required this.produit,
+    this.quantite = 1,
+    this.typeVente = "partiel"
+  });
 
-  double get total => quantite * article.prix;
+  // Choisit le bon prix selon le type de vente
+  double get prixApplique => typeVente == "entier" ? produit.prixLot : produit.prixUnitaire;
+
+  double get total => prixApplique * quantite;
 }

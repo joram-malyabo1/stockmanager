@@ -1,5 +1,8 @@
 class Reception {
   final String id;
+  final String produitId;
+  final String rayonId;
+  final String? typeProduitId;
   final String produitNom;
   final String produitRef;
   final String rayonNom;
@@ -8,8 +11,9 @@ class Reception {
   final String fournisseur;
   final String photoUrl;
   final DateTime? dateReception;
-  final String statutReception; // ex: EN_ATTENTE, VALIDÉ
-  final String statut; // ex: controle, stocke
+  final String statutReception;
+  final String statut;
+  final String? observations; // ✅ AJOUTÉ ICI
 
   // Champs pour les LOTS
   final int? nombrePieces;
@@ -18,6 +22,9 @@ class Reception {
 
   Reception({
     required this.id,
+    required this.produitId,
+    required this.rayonId,
+    this.typeProduitId,
     required this.produitNom,
     required this.produitRef,
     required this.rayonNom,
@@ -28,6 +35,7 @@ class Reception {
     this.dateReception,
     required this.statutReception,
     required this.statut,
+    this.observations, // ✅ AJOUTÉ ICI
     this.nombrePieces,
     this.quantiteParPiece,
     this.uniteDetail,
@@ -40,6 +48,12 @@ class Reception {
 
     return Reception(
       id: json['_id'] ?? '',
+      produitId: produit['_id'] ?? '',
+      rayonId: rayon['_id'] ?? '',
+      typeProduitId: produit['typeProduitId'] is Map
+          ? produit['typeProduitId']['_id']
+          : produit['typeProduitId'],
+
       produitNom: produit['designation'] ?? 'Produit inconnu',
       produitRef: produit['reference'] ?? '',
       rayonNom: rayon['nomRayon'] ?? 'Rayon inconnu',
@@ -50,8 +64,9 @@ class Reception {
       dateReception: json['dateReception'] != null ? DateTime.tryParse(json['dateReception']) : null,
       statutReception: json['statutReception'] ?? 'Inconnu',
       statut: json['statut'] ?? 'Inconnu',
+      observations: json['observations'], // ✅ AJOUTÉ ICI
       nombrePieces: json['nombrePieces'],
-      quantiteParPiece: json['quantiteParPiece'] != null ? json['quantiteParPiece'].toDouble() : null,
+      quantiteParPiece: json['quantiteParPiece'] != null ? (json['quantiteParPiece'] as num).toDouble() : null,
       uniteDetail: json['uniteDetail'],
     );
   }

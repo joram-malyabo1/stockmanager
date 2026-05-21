@@ -7,9 +7,7 @@ class LocalStorageService {
   static const String _keyToken = "token";
   static const String _keyUser = "user";
 
-  // ===========================
   // Sauvegarder les données de login
-  // ===========================
   static Future<void> saveLoginData({
     required String identifier,
     required String password,
@@ -24,13 +22,10 @@ class LocalStorageService {
     } else {
       await prefs.remove(_keyToken);
     }
-    // On sauvegarde l'objet utilisateur sous forme de JSON
     await prefs.setString(_keyUser, jsonEncode(user));
   }
 
-  // ===========================
   // Lire les données de login
-  // ===========================
   static Future<Map<String, dynamic>> getLoginData() async {
     final prefs = await SharedPreferences.getInstance();
     final identifier = prefs.getString(_keyIdentifier);
@@ -52,9 +47,16 @@ class LocalStorageService {
     };
   }
 
-  // ===========================
+  // ✅ Utile pour récupérer l'ID du user connecté n'importe où
+  static Future<String?> getUserId() async {
+    final data = await getLoginData();
+    if (data.containsKey("user")) {
+      return data['user']['id']?.toString();
+    }
+    return null;
+  }
+
   // Supprimer toutes les données de login
-  // ===========================
   static Future<void> clearLoginData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyIdentifier);

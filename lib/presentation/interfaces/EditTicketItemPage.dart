@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Pour limiter la saisie aux nombres
 import '../../models/TicketItem.dart';
 import '../../core/delayed_animation.dart';
 
 class EditItemPage extends StatefulWidget {
   final TicketItem item;
-
   const EditItemPage({Key? key, required this.item}) : super(key: key);
 
   @override
@@ -13,188 +13,193 @@ class EditItemPage extends StatefulWidget {
 
 class _EditItemPageState extends State<EditItemPage> {
   late int quantity;
-  late double unitPrice; // ✅ double (prix)
-  late String devise;
+  late TextEditingController _qtyController;
+
+  final Color orangeMax = const Color(0xFFFF7900);
+  final Color bleuNuit = const Color(0xFF0D084B);
 
   @override
   void initState() {
     super.initState();
     quantity = widget.item.quantite;
-    unitPrice = widget.item.article.prix; // ✅ plus de cast
-    devise = widget.item.article.devise;
+    _qtyController = TextEditingController(text: quantity.toString());
   }
 
-  String formatPrice(double value) {
-    return "${value.toStringAsFixed(2)} $devise";
+  @override
+  void dispose() {
+    _qtyController.dispose();
+    super.dispose();
+  }
+
+  double get currentTotal => widget.item.prixApplique * quantity;
+
+  // Mise à jour synchrone du texte et de la variable
+  void _updateQty(int newQty) {
+    if (newQty < 1) return;
+    setState(() {
+      quantity = newQty;
+      _qtyController.text = newQty.toString();
+    });
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(90),
+      child: Container(
+        decoration: BoxDecoration(
+          color: bleuNuit,
+          borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(35), bottomRight: Radius.circular(35)),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Text(
+              "MODIFIER LA QUANTITÉ",
+              style: TextStyle(color: orangeMax, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.2),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final double total = quantity * unitPrice;
+    final bool isLot = widget.item.typeVente == "entier";
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "${widget.item.article.nom} — ${formatPrice(unitPrice)}",
-          style: const TextStyle(color: Colors.white),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, {
-                "quantity": quantity,
-                "remove": false,
-              });
-            },
-            child: const Text(
-              "ENREGISTRER",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          )
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      backgroundColor: const Color(0xFFF4F7FA),
+      appBar: _buildAppBar(),
+      body: SingleChildScrollView( // Ajout du scroll pour éviter les erreurs quand le clavier sort
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
         child: Column(
           children: [
-            const SizedBox(height: 8),
-
-            // ---- TITRE QUANTITÉ ----
-            DelayedAnimation(
-              delay: 100,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Quantité",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+            Text(
+              widget.item.produit.designation,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: bleuNuit),
             ),
+            const SizedBox(height: 10),
+            _buildBadge(isLot),
+            const SizedBox(height: 30),
 
-            const SizedBox(height: 16),
+            // CARTE DU TOTAL
+            _buildTotalCard(),
 
-            // ---- CONTROLE QUANTITÉ ----
-            DelayedAnimation(
-              delay: 200,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    iconSize: 40,
-                    onPressed: quantity > 1
-                        ? () {
-                      setState(() {
-                        quantity--;
-                      });
-                    }
-                        : null,
-                    icon: const Icon(Icons.remove),
-                  ),
-                  const SizedBox(width: 24),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 8),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      quantity.toString(),
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  IconButton(
-                    iconSize: 40,
-                    onPressed: () {
-                      setState(() {
-                        quantity++;
-                      });
-                    },
-                    icon: const Icon(Icons.add),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(height: 50),
+
+            const Text("SAISISSEZ OU AJUSTEZ LA QUANTITÉ",
+                style: TextStyle(color: Colors.blueGrey, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1)),
 
             const SizedBox(height: 30),
 
-            // ---- PRIX UNITAIRE ----
-            DelayedAnimation(
-              delay: 300,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text("Prix unitaire",
-                      style: TextStyle(fontSize: 16)),
-                  Text(
-                    formatPrice(unitPrice),
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-            ),
+            // ZONE DE SAISIE AVEC + ET -
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _qtyActionBtn(Icons.remove, Colors.red, () => _updateQty(quantity - 1)),
 
-            const SizedBox(height: 12),
-
-            // ---- TOTAL ----
-            DelayedAnimation(
-              delay: 400,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Total",
-                    style:
-                    TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    formatPrice(total),
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-
-            const Spacer(),
-
-            // ---- BOUTON RETIRER ----
-            DelayedAnimation(
-              delay: 500,
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context, {"remove": true});
-                  },
-                  child: const Text(
-                    "RETIRER DU TICKET",
-                    style: TextStyle(color: Colors.red, fontSize: 16),
+                // ✅ CHAMP DE SAISIE DIRECTE
+                Container(
+                  width: 150,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  child: TextField(
+                    controller: _qtyController,
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 45, fontWeight: FontWeight.w900, color: bleuNuit),
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly], // Uniquement des chiffres
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "0",
+                    ),
+                    onChanged: (val) {
+                      if (val.isNotEmpty) {
+                        setState(() {
+                          quantity = int.parse(val);
+                        });
+                      }
+                    },
                   ),
                 ),
+
+                _qtyActionBtn(Icons.add, Colors.green, () => _updateQty(quantity + 1)),
+              ],
+            ),
+
+            const SizedBox(height: 60),
+
+            // BOUTON VALIDER
+            SizedBox(
+              width: double.infinity,
+              height: 60,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: orangeMax,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  elevation: 3,
+                ),
+                onPressed: () => Navigator.pop(context, {"remove": false, "quantity": quantity}),
+                child: const Text("ENREGISTRER", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
+
+            TextButton.icon(
+              onPressed: () => Navigator.pop(context, {"remove": true}),
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              label: const Text("SUPPRIMER DE LA LISTE", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            )
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBadge(bool isLot) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isLot ? Colors.purple.withOpacity(0.1) : bleuNuit.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: isLot ? Colors.purple : bleuNuit),
+      ),
+      child: Text(
+        isLot ? "VENTE EN GROS" : "VENTE AU DÉTAIL",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: isLot ? Colors.purple : bleuNuit),
+      ),
+    );
+  }
+
+  Widget _buildTotalCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+      ),
+      child: Column(
+        children: [
+          const Text("PRIX TOTAL CALCULÉ", style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 5),
+          Text("${currentTotal.toStringAsFixed(0)} FG",
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: orangeMax)),
+        ],
+      ),
+    );
+  }
+
+  Widget _qtyActionBtn(IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withOpacity(0.1),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Icon(icon, size: 30, color: color),
       ),
     );
   }
